@@ -1,0 +1,27 @@
+{
+  "name": "aut_assistant_bot",
+  "version": "0.0.0",
+  "description": "AUT assistant bot",
+  "main": "index.js",
+  "author": "mpnri",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev src/app.ts"
+  },
+  "dependencies": {
+    "mongoose": "^7.5.0",
+    "socks-proxy-agent": "^8.0.1",
+    "telegraf": "^4.12.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  }
+}

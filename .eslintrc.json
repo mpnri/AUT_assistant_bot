@@ -1,0 +1,14 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "lk-custom"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "no-console": "warn",
+    // "@typescript-eslint/no-empty-function": "warn"
+    // add your custom rules here
+  }
+}
+  

@@ -1,0 +1,17 @@
+node_modules/
+lib/
+dist/
+yarn-error.log
+.vscode/
+
+# *.tsbuildinfo
+# *.log
+.npmrc
+# .watchman*
+
+.vscode/
+
+learn/
+*.env
+
+public/
