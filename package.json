@@ -2,14 +2,15 @@
   "name": "aut_assistant_bot",
   "version": "0.0.0",
   "description": "AUT assistant bot",
-  "main": "index.js",
+  "main": "index.ts",
   "author": "mpnri",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node-dev src/app.ts"
+    "dev": "ts-node-dev src/index.ts"
   },
   "dependencies": {
+    "dotenv": "^16.3.1",
     "mongoose": "^7.5.0",
     "socks-proxy-agent": "^8.0.1",
     "telegraf": "^4.12.2"
