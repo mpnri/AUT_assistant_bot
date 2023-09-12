@@ -2,7 +2,7 @@ import { SocksProxyAgent } from "socks-proxy-agent";
 import { Context, Markup, Telegraf, session } from "telegraf";
 import { strings } from "./intl/fa";
 import { formatStrings } from "./utils";
-import { User, UserDocument, connectToDB } from "./db";
+import { User, UserDocument, connectToDB, useTransaction } from "./db";
 import { BotContext, InitialSessionData } from "./session";
 import { BotStage } from "./Scenes";
 
@@ -23,10 +23,13 @@ export const MainApp = async (token: string) => {
     if (chat.type !== "private") return;
 
     //* save user to DB if not exist
-    if (!(await User.findOne({ uid: chat.id }))) {
-      const userDB = new User<UserDocument>({ uid: chat.id, state: 0 });
-      await userDB.save();
-    }
+    await useTransaction(async () => {
+      if (!(await User.findOne({ uid: chat.id }))) {
+        const userDB = new User<UserDocument>({ uid: chat.id, state: 0 });
+        await userDB.save();
+      }
+    });
+    //todo: add catch??
     // await User.updateOne(
     //   { uid: chat.id },
     //   { $setOnInsert: { uid: chat.id, state: 0 } },

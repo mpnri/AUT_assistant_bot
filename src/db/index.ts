@@ -17,3 +17,4 @@ export const connectToDB = async () => {
 };
 
 export { User, type UserDocument } from "./models/User";
+export { useTransaction } from "./session";
