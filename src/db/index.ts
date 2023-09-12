@@ -16,5 +16,5 @@ export const connectToDB = async () => {
   console.log("DB Connected:", DB_URL);
 };
 
-export { User, type UserDocument } from "./models/User";
+export * from "./models";
 export { useTransaction } from "./session";
