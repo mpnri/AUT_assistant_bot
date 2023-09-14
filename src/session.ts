@@ -12,7 +12,9 @@ export interface SessionData {
 
   //* send message scene
   messageTemp?: {
-    title: string;
+    type: "text" | "poll";
+    title?: string;
+    pollOptions?: string[];
   };
 }
 

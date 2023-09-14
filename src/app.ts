@@ -51,11 +51,16 @@ export const MainApp = async (token: string) => {
   //todo
   bot.hears("Show Messages", async (ctx) => {
     const messagesList = await Message.find();
-    const sendMessages = async (list: { title: string; index: number }[]) => {
+    const sendMessages = async (
+      list: { title: string; index: number; pollOptions: string[] }[],
+    ) => {
       if (!list.length) return;
       const message = list.shift();
       if (!message) return;
-      await ctx.reply(`Message ${message.index}: \n${message.title}`);
+      const rep =
+        `Message ${message.index}: \n${message.title}` +
+        (message.pollOptions.length ? `\nOptions: \n${message.pollOptions.join("\n")}` : "");
+      await ctx.reply(rep);
       await sendMessages(list);
     };
 
@@ -63,10 +68,11 @@ export const MainApp = async (token: string) => {
       messagesList
         .map((message, index) => ({
           title: message.title,
+          pollOptions: message.type === "poll" ? message.pollOptions ?? [] : [],
           index,
         }))
         .reverse()
-        .slice(0, 10)
+        .slice(0, 5)
         .reverse(),
     );
   });
