@@ -11,7 +11,7 @@ const userSchema = new Schema<UserDocument>(
   {
     uid: { type: Number, required: true, unique: true, index: true },
     state: { type: Number, required: true },
-    messages: { type: [Schema.Types.ObjectId], default: [] },
+    messages: { type: [Schema.Types.ObjectId], ref: Models.Message, default: [] },
   },
   { timestamps: true },
 );
