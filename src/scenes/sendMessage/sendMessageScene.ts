@@ -17,13 +17,19 @@ const isValidState = (
   }
 
   if (message.text === "back") {
-    ctx.scene.leave();
-    //todo:
-    ctx.reply("OK", Markup.keyboard(["Send Feedback", "Show Messages"]));
+    ctx.scene.enter(ScenesIDs.MainScene);
     return false;
   }
   return true;
 };
+
+//todo: keyboards
+// const keyboards = {
+//   message_type: Markup.keyboard(["text", "poll", Markup.button.text("back")], {
+//     columns: 2,
+//   }).resize(),
+  
+// };
 
 const sendMessageScene = new Scenes.WizardScene<BotContext>(
   ScenesIDs.SendMessageScene,
@@ -117,7 +123,6 @@ sendMessageScene.leave((ctx) => {
 });
 
 export { sendMessageScene };
-
 
 // const sendMessageScene = new Scenes.BaseScene<BotContext>(ScenesIDs.SendMessageScene);
 
