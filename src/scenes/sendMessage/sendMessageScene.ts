@@ -1,8 +1,11 @@
 import { Message, MessageDocument, User, useTransaction } from "../../db";
 import { BotContext } from "../../session";
 import { Markup, Scenes } from "telegraf";
-import { ScenesIDs } from "../common";
+import { ScenesIDs, goToMainScene } from "../common";
 import { MessageTypes, isTextMessage } from "../../utils";
+import { strings } from "../../intl/fa";
+
+const str = strings.scenes.sendingMessage;
 
 //todo: split valid state(text or query) and back button
 const isValidState = (
@@ -12,24 +15,23 @@ const isValidState = (
 ): message is MessageTypes.TextMessage => {
   // console.log((message as any)?.text)
   if (!message || !isTextMessage(message) || (extraValidation && !extraValidation(message.text))) {
-    ctx.reply("ورودی معتبر نیست");
+    ctx.reply(strings.invalid_input);
     return false;
   }
 
   if (message.text === "back") {
-    ctx.scene.enter(ScenesIDs.MainScene);
+    goToMainScene(ctx);
     return false;
   }
   return true;
 };
 
 //todo: keyboards
-// const keyboards = {
-//   message_type: Markup.keyboard(["text", "poll", Markup.button.text("back")], {
-//     columns: 2,
-//   }).resize(),
-  
-// };
+const keyboards = {
+  message_type: Markup.keyboard(["text", "poll", Markup.button.text("back")], {
+    columns: 2,
+  }).resize(),
+};
 
 const sendMessageScene = new Scenes.WizardScene<BotContext>(
   ScenesIDs.SendMessageScene,
@@ -37,7 +39,7 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
     ctx.session.messageTemp = undefined;
     //todo
     await ctx.reply(
-      "Please choose your message type",
+      str.get_message_type,
       Markup.keyboard(["text", "poll", Markup.button.text("back")], { columns: 2 }).resize(),
     );
     return ctx.wizard.next();
@@ -49,7 +51,7 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
     }
 
     ctx.session.messageTemp = { type: message.text === "text" ? "text" : "poll" };
-    await ctx.reply("Please enter your message title", Markup.keyboard(["back"]));
+    await ctx.reply(str.get_message_title, Markup.keyboard(["back"]));
 
     return ctx.wizard.next();
   },
@@ -62,9 +64,9 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
     if (!ctx.session.messageTemp) throw new Error("no message Temp");
     ctx.session.messageTemp.title = message.text;
     if (ctx.session.messageTemp.type === "text") {
-      await ctx.scene.leave();
+      await goToMainScene(ctx);
     } else {
-      ctx.reply("گزینه های خود رو هر کدام در یک پیام وارد کنید. برای پایان end بفرستید.");
+      ctx.reply(str.get_poll_options);
       return ctx.wizard.next();
     }
   },
@@ -79,18 +81,18 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
 
     if (message.text.trim() === "end") {
       if (!messageTemp.pollOptions.length) {
-        await ctx.reply("حداقل باید یک گزینه وارد کنید.");
+        await ctx.reply(str.should_send_one_option);
         return;
       }
-      await ctx.scene.leave();
+      await goToMainScene(ctx);
       return;
     }
-    await ctx.reply("لطفا گزینه بعدی رو ارسال کنید.");
+    await ctx.reply(str.get_next_option);
     messageTemp.pollOptions.push(message.text);
   },
 );
 
-sendMessageScene.leave((ctx) => {
+sendMessageScene.leave(async (ctx) => {
   const chat = ctx.chat;
   const message = ctx.session.messageTemp;
   if (chat?.type !== "private" || !message) return;
@@ -98,7 +100,7 @@ sendMessageScene.leave((ctx) => {
   const { title, type, pollOptions } = message;
   if (!title) return;
 
-  useTransaction(async () => {
+  await useTransaction(async () => {
     const user = await User.findOne({ uid: chat.id });
     console.log(user);
     if (user) {
@@ -118,8 +120,7 @@ sendMessageScene.leave((ctx) => {
     }
   });
   ctx.session.messageTemp = undefined;
-  //todo
-  ctx.reply("Thanks for your feedback", Markup.keyboard(["Send Feedback", "Show Messages"]));
+  await ctx.reply(str.message_sent_successfully);
 });
 
 export { sendMessageScene };

@@ -5,16 +5,17 @@ import { ScenesIDs } from "../common";
 import { formatStrings } from "../../utils";
 import { strings } from "../../intl/fa";
 
-const str = strings.main;
+const str = strings.scenes.main;
 
 const mainScene = new Scenes.WizardScene<BotContext>(ScenesIDs.MainScene, async (ctx) => {
   const chat = ctx.chat;
   if (chat?.type !== "private") return;
   const userName = chat.first_name + " " + (chat.last_name ?? "");
-  ctx.reply(
-    formatStrings(str.start.hi_user, { name: userName }),
+  await ctx.reply(
+    ctx.session.cnt ? str.start.any_help : formatStrings(str.start.hi_user, { name: userName }),
     Markup.keyboard(["Send Feedback", "Show Messages"]),
   );
+  ctx.session.cnt = 1;
 });
 
 mainScene.hears("Send Feedback", async (ctx) => {

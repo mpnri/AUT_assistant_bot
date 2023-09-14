@@ -1,8 +1,7 @@
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { Context, Markup, Telegraf, session } from "telegraf";
 import { strings } from "./intl/fa";
-import { formatStrings } from "./utils";
-import { Message, User, UserDocument, connectToDB, useTransaction } from "./db";
+import { User, UserDocument, connectToDB, useTransaction } from "./db";
 import { BotContext, InitialSessionData } from "./session";
 import { BotStage, ScenesIDs } from "./scenes";
 
@@ -36,10 +35,10 @@ export const MainApp = async (token: string) => {
     //   { upsert: true },
     // );
 
-    ctx.session.cnt++;
+    ctx.session.cnt = 0;
     console.log(ctx.session.cnt);
     
-    ctx.scene.enter(ScenesIDs.MainScene);
+    await ctx.scene.enter(ScenesIDs.MainScene);
   });
 
   bot.launch();
