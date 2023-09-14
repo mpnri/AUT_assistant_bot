@@ -1,5 +1,5 @@
 import mongoose, { Schema, Types } from "mongoose";
-import { Models } from "./common";
+import { Models } from "../common";
 
 export interface MessageDocument {
   id?: Types.ObjectId;
