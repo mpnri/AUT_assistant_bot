@@ -23,6 +23,10 @@ mainScene.hears("Send Feedback", async (ctx) => {
 });
 
 mainScene.hears("Show Messages", async (ctx) => {
+  ctx.scene.enter(ScenesIDs.ShowMessagesScene);
+});
+
+mainScene.hears("Show Messages 2", async (ctx) => {
   const messagesList = await Message.find();
   const sendMessages = async (list: { title: string; index: number; pollOptions: string[] }[]) => {
     if (!list.length) return;

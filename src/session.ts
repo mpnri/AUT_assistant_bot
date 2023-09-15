@@ -16,6 +16,11 @@ export interface SessionData {
     title?: string;
     pollOptions?: string[];
   };
+
+  //* show messages scene
+  currentMessageTemp?: {
+    _id: string;
+  }
 }
 
 export const InitialSessionData: Omit<SessionData, "__scenes"> = {

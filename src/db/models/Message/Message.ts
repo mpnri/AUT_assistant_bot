@@ -1,12 +1,22 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 import { Models } from "../common";
 
-export interface MessageDocument {
+export enum MessageState {
+  New = "New",
+  // Read = "Read",
+  Sent = "Sent",
+  Deleted = "Deleted",
+}
+
+export interface MessageDocument extends Document {
   id?: Types.ObjectId;
   title: string;
   senderID: Types.ObjectId;
   type: "text" | "poll";
+  state: MessageState;
   pollOptions?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const messageSchema = new Schema<MessageDocument>(
@@ -29,6 +39,7 @@ const messageSchema = new Schema<MessageDocument>(
       enum: ["text", "poll"],
       required: true,
     },
+    state: { type: String, enum: MessageState, required: true },
     pollOptions: {
       type: [String],
       // validate: {

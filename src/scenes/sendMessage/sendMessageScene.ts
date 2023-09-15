@@ -1,11 +1,11 @@
-import { Message, MessageDocument, User, useTransaction } from "../../db";
+import { Message, MessageDocument, MessageState, User, useTransaction } from "../../db";
 import { BotContext } from "../../session";
 import { Markup, Scenes } from "telegraf";
 import { ScenesIDs, goToMainScene } from "../common";
 import { MessageTypes, isTextMessage } from "../../utils";
 import { strings } from "../../intl/fa";
 
-const str = strings.scenes.sendingMessage;
+const str = strings.scenes.sendMessage;
 
 //todo: split valid state(text or query) and back button
 const isValidState = (
@@ -104,10 +104,11 @@ sendMessageScene.leave(async (ctx) => {
     const user = await User.findOne({ uid: chat.id });
     console.log(user);
     if (user) {
-      const messageDB = new Message<MessageDocument>({
+      const messageDB = new Message({
         title: title,
         senderID: user._id,
         type,
+        state: MessageState.New,
         pollOptions,
       });
       messageDB.save();
