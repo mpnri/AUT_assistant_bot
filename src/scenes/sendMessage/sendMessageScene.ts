@@ -13,7 +13,6 @@ const isValidState = (
   message?: MessageTypes.ServiceMessage,
   extraValidation?: (text: string) => boolean,
 ): message is MessageTypes.TextMessage => {
-  // console.log((message as any)?.text)
   if (!message || !isTextMessage(message) || (extraValidation && !extraValidation(message.text))) {
     ctx.reply(strings.invalid_input);
     return false;

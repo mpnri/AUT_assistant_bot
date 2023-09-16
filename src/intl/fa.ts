@@ -10,6 +10,7 @@ export const strings = {
         send_question: "ارسال سوالات و نظرات",
         // my_info: "اطلاعات من",
         about_us: "درباره ما",
+        admin: { review_messages: "بررسی پیام های ارسالی" },
       },
     },
     sendMessage: {
@@ -27,7 +28,7 @@ export const strings = {
       no_new_messages: "پیام جدیدی وجود ندارد.",
       message_text: "متن پیام ارسالی:",
       message_type: "نوع پیام ارسالی:",
-      message_option: "گزینه {number}:"
+      message_option: "گزینه {number}:",
     },
   },
   invalid_input: "🚫 ورودی معتبر نیست",

@@ -1,7 +1,7 @@
 import { Message, MessageDocument, User, useTransaction } from "../../db";
 import { BotContext } from "../../session";
 import { Markup, Scenes } from "telegraf";
-import { ScenesIDs } from "../common";
+import { ScenesIDs, isAdmin } from "../common";
 import { formatStrings } from "../../utils";
 import { strings } from "../../intl/fa";
 
@@ -13,20 +13,24 @@ const mainScene = new Scenes.WizardScene<BotContext>(ScenesIDs.MainScene, async 
   const userName = chat.first_name + " " + (chat.last_name ?? "");
   await ctx.reply(
     ctx.session.cnt ? str.start.any_help : formatStrings(str.start.hi_user, { name: userName }),
-    Markup.keyboard(["Send Feedback", "Show Messages"]),
+    isAdmin(ctx)
+      ? Markup.keyboard([str.keyboard.send_question, str.keyboard.admin.review_messages])
+      : Markup.keyboard([str.keyboard.send_question]),
   );
   ctx.session.cnt = 1;
 });
 
-mainScene.hears("Send Feedback", async (ctx) => {
+mainScene.hears(str.keyboard.send_question, async (ctx) => {
   ctx.scene.enter(ScenesIDs.SendMessageScene);
 });
 
-mainScene.hears("Show Messages", async (ctx) => {
+mainScene.hears(str.keyboard.admin.review_messages, async (ctx) => {
+  if (!isAdmin(ctx)) return;
   ctx.scene.enter(ScenesIDs.ShowMessagesScene);
 });
 
 mainScene.hears("Show Messages 2", async (ctx) => {
+  if (!isAdmin(ctx)) return;
   const messagesList = await Message.find();
   const sendMessages = async (list: { title: string; index: number; pollOptions: string[] }[]) => {
     if (!list.length) return;

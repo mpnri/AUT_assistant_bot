@@ -1,7 +1,7 @@
 import { Message, MessageDocument, MessageState, User, useTransaction } from "../../db";
 import { BotContext } from "../../session";
 import { Markup, Scenes } from "telegraf";
-import { ScenesIDs, goToMainScene } from "../common";
+import { ScenesIDs, goToMainScene, isAdmin } from "../common";
 import { formatStrings } from "../../utils";
 import { strings } from "../../intl/fa";
 
@@ -24,7 +24,6 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
   const message = response[0];
 
   if (!message) {
-    ctx.session.currentMessageTemp = { _id: "" };
     const extra = {
       reply_markup: {
         inline_keyboard: mode
@@ -43,11 +42,12 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
 
     if (mode) {
       //* if we have mode, then a callback query dispatched. so we can use edit text.
-      await ctx.editMessageText(str.no_new_messages, extra);
+      // await ctx.editMessageText(str.no_new_messages, extra);
     } else {
+      ctx.session.currentMessageTemp = { _id: "" };
       await ctx.reply(str.no_new_messages, extra);
     }
-    return;
+    return false;
   }
 
   const messageText =
@@ -87,11 +87,16 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
       reply_markup,
     });
   }
+  return true;
 };
 
 const showMessagesScene = new Scenes.WizardScene<BotContext>(
   ScenesIDs.ShowMessagesScene,
   async (ctx) => {
+    if (!isAdmin(ctx)) {
+      await goToMainScene(ctx);
+      return;
+    }
     const chat = ctx.chat;
     ctx.session.currentMessageTemp = undefined;
     if (chat?.type !== "private") return;
@@ -133,7 +138,15 @@ showMessagesScene.action("confirm", async (ctx) => {
     message.state = MessageState.Sent;
     await message.save();
   });
-  await handleShowMessages(ctx, "next");
+  let newMessageFound = await handleShowMessages(ctx, "next");
+  if (!newMessageFound) {
+    //* if no messages remaining in forward
+    newMessageFound = await handleShowMessages(ctx, "back");
+    if (!newMessageFound) {
+      //* if no messages remaining at all
+      await handleShowMessages(ctx);
+    }
+  }
   // await ctx.deleteMessage(ctx.callbackQuery.message?.message_id);
 });
 
