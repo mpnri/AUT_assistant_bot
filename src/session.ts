@@ -11,6 +11,7 @@ export interface SessionData {
   __scenes: any;
 
   //* send message scene
+  replyMessageID?: number;
   messageTemp?: {
     type: "text" | "poll";
     title?: string;

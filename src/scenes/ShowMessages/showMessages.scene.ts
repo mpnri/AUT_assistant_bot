@@ -30,12 +30,12 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
           ? [
               [
                 mode === "next"
-                  ? Markup.button.callback("پیام قبلی ⬅️", "back")
-                  : Markup.button.callback("➡️ پیام بعدی", "next"),
+                  ? Markup.button.callback(str.buttons.last_message, "back")
+                  : Markup.button.callback(str.buttons.next_message, "next"),
               ],
-              [Markup.button.callback("🏠 بازگشت 🏠", "home")],
+              [Markup.button.callback(str.buttons.back_to_home, "home")],
             ]
-          : [[Markup.button.callback("🏠 بازگشت 🏠", "home")]],
+          : [[Markup.button.callback(str.buttons.back_to_home, "home")]],
       },
     };
     ctx.answerCbQuery("❎ " + str.no_new_messages, { show_alert: false });
@@ -51,13 +51,13 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
   }
 
   const messageText =
-    `🔷 <b>${str.message_type}</b>\n${strings[message.type]}\n\n` +
-    `✏️ <b>${str.message_text}</b>\n${message.title}\n\n` +
+    `🔷 <b>${str.message.type}</b>\n${strings[message.type]}\n\n` +
+    `✏️ <b>${str.message.text}</b>\n${message.title}\n\n` +
     (message.type === "poll"
       ? message.pollOptions
           ?.map(
             (option, index) =>
-              `<b>${formatStrings(str.message_option, { number: index + 1 })}</b>` +
+              `<b>${formatStrings(str.message.option, { number: index + 1 })}</b>` +
               `\n🔸 ${option}`,
           )
           .join("\n")
@@ -68,12 +68,12 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
     inline_keyboard: [
       mode
         ? [
-            Markup.button.callback("پیام قبلی ⬅️", "back"),
-            Markup.button.callback("➡️ پیام بعدی", "next"),
+            Markup.button.callback(str.buttons.last_message, "back"),
+            Markup.button.callback(str.buttons.next_message, "next"),
           ]
-        : [Markup.button.callback("➡️ پیام بعدی", "next")],
-      [Markup.button.callback("✅ تایید و ارسال در کانال", "confirm")],
-      [Markup.button.callback("🏠 بازگشت 🏠", "home")],
+        : [Markup.button.callback(str.buttons.next_message, "next")],
+      [Markup.button.callback(str.buttons.confirm_message, "confirm")],
+      [Markup.button.callback(str.buttons.back_to_home, "home")],
     ],
   };
   if (mode) {
@@ -127,17 +127,19 @@ showMessagesScene.action("confirm", async (ctx) => {
   if (!currentMessageID || !channelID) throw new Error("no currentMessageID");
   const message = await Message.findById(currentMessageID);
   if (!message) throw new Error("message now found");
-  console.log(channelID);
+
   if (message.type === "text") {
     await ctx.telegram.sendMessage(channelID, message.title);
   } else {
     if (!message.pollOptions?.length) throw new Error("empty options");
     await ctx.telegram.sendPoll(channelID, message.title, message.pollOptions);
   }
+
   await useTransaction(async () => {
     message.state = MessageState.Sent;
     await message.save();
   });
+
   let newMessageFound = await handleShowMessages(ctx, "next");
   if (!newMessageFound) {
     //* if no messages remaining in forward

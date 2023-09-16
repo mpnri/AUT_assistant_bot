@@ -3,7 +3,7 @@ import { Context, Markup, Telegraf, session } from "telegraf";
 import { strings } from "./intl/fa";
 import { User, UserDocument, connectToDB, useTransaction } from "./db";
 import { BotContext, InitialSessionData } from "./session";
-import { BotStage, ScenesIDs } from "./scenes";
+import { BotStage, ScenesIDs, goToMainScene } from "./scenes";
 
 const proxy = new SocksProxyAgent("socks5://127.0.0.1:10808");
 
@@ -23,7 +23,7 @@ export const MainApp = async (token: string) => {
     // console.log(ctx.message);
     if (chat.type !== "private") return;
 
-    //* save user to DB if not exist
+    //* add user to DB if not exist
     await useTransaction(async () => {
       if (!(await User.findOne({ uid: chat.id }))) {
         const userDB = new User<UserDocument>({ uid: chat.id, state: 0 });
@@ -40,7 +40,13 @@ export const MainApp = async (token: string) => {
     ctx.session.cnt = 0;
     console.log(ctx.session.cnt);
     await ctx.telegram.setMyCommands([{ command: "/start", description: "شروع مجدد بات" }]);
-    await ctx.scene.enter(ScenesIDs.MainScene);
+    await goToMainScene(ctx);
+  });
+
+  bot.use(async (ctx) => {
+    if (ctx.scene.current?.id !== ScenesIDs.MainScene) {
+      await goToMainScene(ctx);
+    }
   });
 
   bot.launch();
