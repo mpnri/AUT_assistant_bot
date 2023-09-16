@@ -11,7 +11,7 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
   const currentMessageID = ctx.session.currentMessageTemp?._id;
   if (mode && currentMessageID === undefined) throw new Error("no currentMessageID");
   const query = (() => {
-    //* if no mode or currentMessage is empty, no condition
+    //* if mode is not defined or currentMessageID is empty -> no condition
     if (!mode || !currentMessageID) return { $exists: true };
 
     return mode === "next" ? { $gt: currentMessageID } : { $lt: currentMessageID };
@@ -31,15 +31,18 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
           ? [
               [
                 mode === "next"
-                  ? Markup.button.callback("پیام قبلی", "back")
-                  : Markup.button.callback("پیام بعدی", "next"),
+                  ? Markup.button.callback("پیام قبلی ⬅️", "back")
+                  : Markup.button.callback("➡️ پیام بعدی", "next"),
               ],
-              [Markup.button.callback("home", "home")],
+              [Markup.button.callback("🏠 بازگشت 🏠", "home")],
             ]
-          : [[Markup.button.callback("home", "home")]],
+          : [[Markup.button.callback("🏠 بازگشت 🏠", "home")]],
       },
     };
+    ctx.answerCbQuery("❎ " + str.no_new_messages, { show_alert: false });
+
     if (mode) {
+      //* if we have mode, then a callback query dispatched. so we can use edit text.
       await ctx.editMessageText(str.no_new_messages, extra);
     } else {
       await ctx.reply(str.no_new_messages, extra);
@@ -48,15 +51,14 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
   }
 
   const messageText =
-    `🗒<b>${str.message_type}</b>\n${strings[message.type]}\n\n` +
-    `✏️<b>${str.message_text}</b>\n${message.title}\n` +
+    `🔷 <b>${str.message_type}</b>\n${strings[message.type]}\n\n` +
+    `✏️ <b>${str.message_text}</b>\n${message.title}\n\n` +
     (message.type === "poll"
       ? message.pollOptions
           ?.map(
             (option, index) =>
-              `🔸<b>${formatStrings(str.message_option, { number: index + 1 })}</b>` +
-              "\n" +
-              option,
+              `<b>${formatStrings(str.message_option, { number: index + 1 })}</b>` +
+              `\n🔸 ${option}`,
           )
           .join("\n")
       : "");
@@ -65,9 +67,13 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
   const reply_markup = {
     inline_keyboard: [
       mode
-        ? [Markup.button.callback("پیام قبلی", "back"), Markup.button.callback("پیام بعدی", "next")]
-        : [Markup.button.callback("پیام بعدی", "next")],
-      [Markup.button.callback("home", "home")],
+        ? [
+            Markup.button.callback("پیام قبلی ⬅️", "back"),
+            Markup.button.callback("➡️ پیام بعدی", "next"),
+          ]
+        : [Markup.button.callback("➡️ پیام بعدی", "next")],
+      [Markup.button.callback("✅ تایید و ارسال در کانال", "confirm")],
+      [Markup.button.callback("🏠 بازگشت 🏠", "home")],
     ],
   };
   if (mode) {
@@ -107,6 +113,27 @@ showMessagesScene.action("next", async (ctx) => {
 
 showMessagesScene.action("back", async (ctx) => {
   await handleShowMessages(ctx, "back");
+  // await ctx.deleteMessage(ctx.callbackQuery.message?.message_id);
+});
+
+showMessagesScene.action("confirm", async (ctx) => {
+  const currentMessageID = ctx.session.currentMessageTemp?._id;
+  const channelID = process.env.CHANNEL_ID;
+  if (!currentMessageID || !channelID) throw new Error("no currentMessageID");
+  const message = await Message.findById(currentMessageID);
+  if (!message) throw new Error("message now found");
+  console.log(channelID);
+  if (message.type === "text") {
+    await ctx.telegram.sendMessage(channelID, message.title);
+  } else {
+    if (!message.pollOptions?.length) throw new Error("empty options");
+    await ctx.telegram.sendPoll(channelID, message.title, message.pollOptions);
+  }
+  await useTransaction(async () => {
+    message.state = MessageState.Sent;
+    await message.save();
+  });
+  await handleShowMessages(ctx, "next");
   // await ctx.deleteMessage(ctx.callbackQuery.message?.message_id);
 });
 

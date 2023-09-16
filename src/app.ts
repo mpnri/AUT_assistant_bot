@@ -19,6 +19,8 @@ export const MainApp = async (token: string) => {
 
   bot.start(async (ctx) => {
     const chat = ctx.chat;
+    // console.log(chat);
+    // console.log(ctx.message);
     if (chat.type !== "private") return;
 
     //* save user to DB if not exist
@@ -37,7 +39,7 @@ export const MainApp = async (token: string) => {
 
     ctx.session.cnt = 0;
     console.log(ctx.session.cnt);
-    
+    await ctx.telegram.setMyCommands([{ command: "/start", description: "شروع مجدد بات" }]);
     await ctx.scene.enter(ScenesIDs.MainScene);
   });
 
