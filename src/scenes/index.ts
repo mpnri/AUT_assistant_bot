@@ -1,8 +1,8 @@
 import { BotContext } from "../session";
 import { Scenes } from "telegraf";
-import { sendMessageScene } from "./sendMessage/sendMessageScene";
-import { mainScene } from "./Main/mainScene";
-import { showMessagesScene } from "./ShowMessages/showMessagesScene";
+import { sendMessageScene } from "./sendMessage/sendMessage.scene";
+import { mainScene } from "./Main/main.scene";
+import { showMessagesScene } from "./ShowMessages/showMessages.scene";
 
 export * from "./common";
 export const BotStage = new Scenes.Stage<BotContext>([
