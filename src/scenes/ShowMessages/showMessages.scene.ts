@@ -72,7 +72,10 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
             Markup.button.callback(str.buttons.next_message, "next"),
           ]
         : [Markup.button.callback(str.buttons.next_message, "next")],
-      [Markup.button.callback(str.buttons.confirm_message, "confirm")],
+      [
+        Markup.button.callback(str.buttons.delete_message, "delete"),
+        Markup.button.callback(str.buttons.confirm_message, "confirm"),
+      ],
       [Markup.button.callback(str.buttons.back_to_home, "home")],
     ],
   };
@@ -140,6 +143,8 @@ showMessagesScene.action("confirm", async (ctx) => {
     await message.save();
   });
 
+  await ctx.answerCbQuery(str.toasts.message_sent_successfully);
+
   let newMessageFound = await handleShowMessages(ctx, "next");
   if (!newMessageFound) {
     //* if no messages remaining in forward
@@ -150,6 +155,30 @@ showMessagesScene.action("confirm", async (ctx) => {
     }
   }
   // await ctx.deleteMessage(ctx.callbackQuery.message?.message_id);
+});
+
+showMessagesScene.action("delete", async (ctx) => {
+  const currentMessageID = ctx.session.currentMessageTemp?._id;
+  if (!currentMessageID) throw new Error("no currentMessageID");
+  const message = await Message.findById(currentMessageID);
+  if (!message) throw new Error("message now found");
+
+  await useTransaction(async () => {
+    message.state = MessageState.Deleted;
+    await message.save();
+  });
+
+  await ctx.answerCbQuery(str.toasts.message_deleted_successfully);
+
+  let newMessageFound = await handleShowMessages(ctx, "next");
+  if (!newMessageFound) {
+    //* if no messages remaining in forward
+    newMessageFound = await handleShowMessages(ctx, "back");
+    if (!newMessageFound) {
+      //* if no messages remaining at all
+      await handleShowMessages(ctx);
+    }
+  }
 });
 
 showMessagesScene.action("home", async (ctx) => {

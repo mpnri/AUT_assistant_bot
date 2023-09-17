@@ -58,15 +58,18 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
   async (ctx) => {
     const callbackQuery = ctx.callbackQuery;
     if (!isDateQuery(callbackQuery) || !["text", "poll", "home"].includes(callbackQuery.data)) {
-      await ctx.answerCbQuery(strings.invalid_input, { show_alert: false });
+      // await ctx.answerCbQuery(strings.invalid_input, { show_alert: false });
       return;
     }
 
     ctx.session.messageTemp = { type: callbackQuery.data === "text" ? "text" : "poll" };
     //todo: add limitations for both
-    await ctx.editMessageText(str.get_message_title, {
-      reply_markup: { inline_keyboard: [[Markup.button.callback(strings.back_to_home, "home")]] },
-    });
+    await ctx.editMessageText(
+      callbackQuery.data === "text" ? str.get_text_message_title : str.get_poll_message_title,
+      {
+        reply_markup: { inline_keyboard: [[Markup.button.callback(strings.back_to_home, "home")]] },
+      },
+    );
 
     return ctx.wizard.next();
   },
@@ -80,7 +83,9 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
     //* no await
     ctx.deleteMessage(ctx.session.replyMessageID);
 
-    ctx.session.messageTemp.title = message.text;
+    const maxLength = ctx.session.messageTemp.type === "text" ? 1500 : 250;
+    //todo: show error?
+    ctx.session.messageTemp.title = message.text.substring(0, maxLength);
     if (ctx.session.messageTemp.type === "text") {
       await goToMainScene(ctx);
     } else {
@@ -119,12 +124,18 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
     }
 
     if (isTextMessage(message)) {
-      messageTemp.pollOptions.push(message.text);
+      //todo: show error?
+      messageTemp.pollOptions.push(message.text.substring(0, 100));
       ctx.deleteMessage(ctx.session.replyMessageID);
       const replyMessage = await ctx.reply(str.get_next_option, {
         reply_markup: { inline_keyboard: [[Markup.button.callback(str.buttons.end, "end")]] },
       });
       ctx.session.replyMessageID = replyMessage.message_id;
+      if (messageTemp.pollOptions.length === 10) {
+        ctx.deleteMessage(ctx.session.replyMessageID);
+        await goToMainScene(ctx);
+        return ctx.wizard.next();
+      }
       return;
     }
   },
