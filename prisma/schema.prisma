@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DB_URL")
+}
+
+//* Message Start
+enum MessageType {
+  Text
+  Poll
+}
+
+enum MessageState {
+  New
+  // Read
+  Sent
+  Deleted
+}
+
+model Message {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title       String
+  senderID    String       @db.ObjectId
+  sender      User         @relation(fields: [senderID], references: [id])
+  type        MessageType
+  state       MessageState
+  pollOptions String[]     @default([])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // @@index([id])
+}
+
+//* Message End
+
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  uid      Int       @unique
+  state    Int?
+  messages Message[]
+
+  createdAt DateTime @default(now()) @db.Date
+  updatedAt DateTime @updatedAt @db.Date
+}

@@ -1,4 +1,8 @@
+import { PrismaClient } from "@prisma/client";
 import mongoose from "mongoose";
+
+const prisma = new PrismaClient();
+export const usePrisma = () => prisma;
 
 export const connectToDB = async () => {
   const DB_URL = process.env.DB_URL;

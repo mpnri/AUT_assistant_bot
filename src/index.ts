@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { MainApp } from "./app";
+import { Main } from "./app";
 
 dotenv.config().parsed;
 
@@ -11,6 +11,6 @@ console.log("====================================");
 console.log("TOKEN Available");
 console.log("====================================");
 
-MainApp(token);
+Main(token)
 
 export {};
