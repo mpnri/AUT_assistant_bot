@@ -1,0 +1,21 @@
+version: '3'
+services:
+  # AUT-bot:
+  #   # build: .
+  #   depends_on:
+  #     - AUT-mongo
+  #   environment:
+  #     - DB_URL=${DB_URL}
+
+  AUT-mongo:
+    image: mongo:7
+    # image: prismagraphql/mongo-single-replica:5.0.3
+    command: --replSet rs0
+    # todo
+    # environment:
+    #   - name=value
+    ports:
+      - 127.0.0.1:27017:27017
+  
+  #* run after `docker compose up -d` for replica mongo:
+  # docker-compose exec AUT-mongo mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});"
