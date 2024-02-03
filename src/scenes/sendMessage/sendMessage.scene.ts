@@ -1,11 +1,14 @@
-import { Message, MessageDocument, MessageState, User, useTransaction } from "../../db";
+import { Message, MessageDocument, User, usePrisma, useTransaction } from "../../db";
 import { BotContext } from "../../session";
 import { Markup, Scenes } from "telegraf";
 import { ScenesIDs, goToMainScene } from "../common";
 import { MessageTypes, isDateQuery, isTextMessage } from "../../utils";
 import { strings } from "../../intl/fa";
+import { MessageState, MessageType } from "@prisma/client";
 
 const str = strings.scenes.sendMessage;
+
+const prisma = usePrisma();
 
 //todo: split valid state(text or query) and back button
 const isValidState = (
@@ -62,7 +65,7 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
       return;
     }
 
-    ctx.session.messageTemp = { type: callbackQuery.data === "text" ? "text" : "poll" };
+    ctx.session.messageTemp = { type: callbackQuery.data === "text" ? MessageType.Text : MessageType.Poll };
     //todo: add limitations for both
     await ctx.editMessageText(
       callbackQuery.data === "text" ? str.get_text_message_title : str.get_poll_message_title,
@@ -83,10 +86,10 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
     //* no await
     ctx.deleteMessage(ctx.session.replyMessageID);
 
-    const maxLength = ctx.session.messageTemp.type === "text" ? 1500 : 250;
+    const maxLength = ctx.session.messageTemp.type === MessageType.Text ? 1500 : 250;
     //todo: show error?
     ctx.session.messageTemp.title = message.text.substring(0, maxLength);
-    if (ctx.session.messageTemp.type === "text") {
+    if (ctx.session.messageTemp.type === MessageType.Text) {
       await goToMainScene(ctx);
     } else {
       const replyMessage = await ctx.reply(str.get_poll_options, {
@@ -154,21 +157,38 @@ sendMessageScene.leave(async (ctx) => {
   const { title, type, pollOptions } = message;
   if (!title) return;
 
-  await useTransaction(async () => {
-    const user = await User.findOne({ uid: chat.id });
+  await prisma.$transaction(async (tx) => {
+    // });
+
+    // await useTransaction(async () => {
+    // const user = await User.findOne({ uid: chat.id });
+    const user = await tx.user.findUnique({ where: { uid: chat.id } });
+
     console.log(user);
     if (user) {
-      const messageDB = new Message({
-        title: title,
-        senderID: user._id,
-        type,
-        state: MessageState.New,
-        pollOptions,
+      // const messageDB = new Message({
+      //   title: title,
+      //   senderID: user._id,
+      //   type,
+      //   state: MessageState.New,
+      //   pollOptions,
+      // });
+      // messageDB.save();
+      await tx.user.update({
+        where: { uid: user.uid },
+        data: {
+          messages: {
+            create: {
+              title: title,
+              state: MessageState.New,
+              type,
+              pollOptions,
+            },
+          },
+        },
       });
-      messageDB.save();
-
-      user.messages?.push(messageDB._id);
-      user.save();
+      // user.messages?.push(messageDB._id);
+      // user.save();
       //todo: populate?
     } else {
       throw new Error("user not found");

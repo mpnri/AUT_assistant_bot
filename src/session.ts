@@ -1,3 +1,4 @@
+import { MessageType } from "@prisma/client";
 import { Context, Scenes } from "telegraf";
 import { SceneContextScene, SceneSession } from "telegraf/typings/scenes";
 import { SessionContext } from "telegraf/typings/session";
@@ -13,7 +14,7 @@ export interface SessionData {
   //* send message scene
   replyMessageID?: number;
   messageTemp?: {
-    type: "text" | "poll";
+    type: MessageType;
     title?: string;
     pollOptions?: string[];
   };

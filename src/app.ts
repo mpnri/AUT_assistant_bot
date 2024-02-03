@@ -23,22 +23,21 @@ const MainApp = async (token: string) => {
     // console.log(chat);
     // console.log(ctx.message);
     if (chat.type !== "private") return;
-
+    console.log("start");
     //* add user to DB if not exist
-    await prisma
-      .$transaction(async (tx) => {
-        if (!(await tx.user.findUnique({ where: { uid: chat.id } }))) {
-          await tx.user.create({
-            data: {
-              uid: chat.id,
-              state: 0,
-            },
-          });
-        }
-      })
-      .catch((err) => {
-        console.log("Transaction Err\n", err);
-      });
+    await prisma.$transaction(async (tx) => {
+      if (!(await tx.user.findUnique({ where: { uid: chat.id } }))) {
+        await tx.user.create({
+          data: {
+            uid: chat.id,
+            state: 0,
+          },
+        });
+      }
+    });
+    // .catch((err) => {
+    //   console.log("Transaction Err\n", err);
+    // });
 
     // await useTransaction(async () => {
     //   if (!(await User.findOne({ uid: chat.id }))) {
@@ -57,7 +56,7 @@ const MainApp = async (token: string) => {
     console.log(ctx.session.cnt);
     await ctx.telegram.setMyCommands([{ command: "/start", description: "شروع مجدد بات" }]);
     //todo:
-    //* await goToMainScene(ctx);
+    await goToMainScene(ctx);
   });
 
   bot.use(async (ctx) => {
@@ -72,6 +71,7 @@ const MainApp = async (token: string) => {
   process.once("SIGTERM", () => bot.stop("SIGTERM"));
 };
 
+//* close DB
 export const Main = async (token: string) => {
   await MainApp(token)
     .then(async () => {
