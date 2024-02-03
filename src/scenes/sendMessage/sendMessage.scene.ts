@@ -48,8 +48,8 @@ const sendMessageScene = new Scenes.WizardScene<BotContext>(
       reply_markup: {
         inline_keyboard: [
           [
-            Markup.button.callback(strings.text, "text"),
-            Markup.button.callback(strings.poll, "poll"),
+            Markup.button.callback(strings.Text, "text"),
+            Markup.button.callback(strings.Poll, "poll"),
           ],
           [Markup.button.callback(strings.back_to_home, "home")],
         ],

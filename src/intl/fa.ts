@@ -1,3 +1,5 @@
+import { MessageType } from "@prisma/client";
+
 export const strings = {
   scenes: {
     main: {
@@ -53,7 +55,7 @@ export const strings = {
     },
   },
   invalid_input: "🚫 ورودی معتبر نیست",
-  text: "📝 متن",
-  poll: "📊 نظرسنجی",
+  [MessageType.Text]: "📝 متن",
+  [MessageType.Poll]: "📊 نظرسنجی",
   back_to_home: "🏠 بازگشت 🏠",
 };
