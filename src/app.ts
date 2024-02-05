@@ -71,8 +71,9 @@ const MainApp = async (token: string) => {
   process.once("SIGTERM", () => bot.stop("SIGTERM"));
 };
 
-//* close DB
+//* DB
 export const Main = async (token: string) => {
+  await prisma.$connect();
   await MainApp(token)
     .then(async () => {
       await prisma.$disconnect();

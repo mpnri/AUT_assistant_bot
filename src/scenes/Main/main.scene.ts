@@ -32,31 +32,31 @@ mainScene.hears(str.keyboard.admin.review_messages, async (ctx) => {
   ctx.scene.enter(ScenesIDs.ShowMessagesScene);
 });
 
-mainScene.hears("Show Messages 2", async (ctx) => {
-  if (!isAdmin(ctx)) return;
-  const messagesList = await Message.find();
-  const sendMessages = async (list: { title: string; index: number; pollOptions: string[] }[]) => {
-    if (!list.length) return;
-    const message = list.shift();
-    if (!message) return;
-    const rep =
-      `Message ${message.index}: \n${message.title}` +
-      (message.pollOptions.length ? `\nOptions: \n${message.pollOptions.join("\n")}` : "");
-    await ctx.reply(rep);
-    await sendMessages(list);
-  };
+// mainScene.hears("Show Messages 2", async (ctx) => {
+//   if (!isAdmin(ctx)) return;
+//   const messagesList = await Message.find();
+//   const sendMessages = async (list: { title: string; index: number; pollOptions: string[] }[]) => {
+//     if (!list.length) return;
+//     const message = list.shift();
+//     if (!message) return;
+//     const rep =
+//       `Message ${message.index}: \n${message.title}` +
+//       (message.pollOptions.length ? `\nOptions: \n${message.pollOptions.join("\n")}` : "");
+//     await ctx.reply(rep);
+//     await sendMessages(list);
+//   };
 
-  await sendMessages(
-    messagesList
-      .map((message, index) => ({
-        title: message.title,
-        pollOptions: message.type === "poll" ? message.pollOptions ?? [] : [],
-        index,
-      }))
-      .reverse()
-      .slice(0, 5)
-      .reverse(),
-  );
-});
+//   await sendMessages(
+//     messagesList
+//       .map((message, index) => ({
+//         title: message.title,
+//         pollOptions: message.type === "poll" ? message.pollOptions ?? [] : [],
+//         index,
+//       }))
+//       .reverse()
+//       .slice(0, 5)
+//       .reverse(),
+//   );
+// });
 
 export { mainScene };
