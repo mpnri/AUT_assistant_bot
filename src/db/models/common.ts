@@ -1,4 +1,4 @@
-export enum Models {
-  User = "User",
-  Message = "Message",
-}
+// export enum Models {
+//   User = "User",
+//   Message = "Message",
+// }

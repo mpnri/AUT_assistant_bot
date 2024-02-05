@@ -1,4 +1,3 @@
-import { Message, MessageDocument, User, useTransaction } from "../../db";
 import { BotContext } from "../../session";
 import { Markup, Scenes } from "telegraf";
 import { ScenesIDs, isAdmin } from "../common";

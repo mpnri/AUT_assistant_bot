@@ -1,7 +1,7 @@
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { Context, Markup, Telegraf, session } from "telegraf";
 import { strings } from "./intl/fa";
-import { User, UserDocument, connectToDB, usePrisma, useTransaction } from "./db";
+import { usePrisma } from "./db";
 import { BotContext } from "./session";
 import { BotStage, ScenesIDs, goToMainScene } from "./scenes";
 
@@ -9,8 +9,6 @@ const proxy = new SocksProxyAgent("socks5://127.0.0.1:10808");
 const prisma = usePrisma();
 
 const MainApp = async (token: string) => {
-  // await connectToDB();
-
   const bot = new Telegraf<BotContext>(token, {
     telegram: { agent: proxy },
   });
@@ -39,19 +37,6 @@ const MainApp = async (token: string) => {
     //   console.log("Transaction Err\n", err);
     // });
 
-    // await useTransaction(async () => {
-    //   if (!(await User.findOne({ uid: chat.id }))) {
-    //     const userDB = new User<UserDocument>({ uid: chat.id, state: 0 });
-    //     await userDB.save();
-    //   }
-    // });
-    //todo: add catch??
-    // await User.updateOne(
-    //   { uid: chat.id },
-    //   { $setOnInsert: { uid: chat.id, state: 0 } },
-    //   { upsert: true },
-    // );
-
     ctx.session.cnt = 0;
     console.log(ctx.session.cnt);
     await ctx.telegram.setMyCommands([{ command: "/start", description: "شروع مجدد بات" }]);
@@ -61,8 +46,7 @@ const MainApp = async (token: string) => {
 
   bot.use(async (ctx) => {
     if (ctx.scene.current?.id !== ScenesIDs.MainScene) {
-      //todo:
-      //* await goToMainScene(ctx);
+      await goToMainScene(ctx);
     }
   });
 

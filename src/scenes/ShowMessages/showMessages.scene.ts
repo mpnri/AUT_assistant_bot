@@ -1,4 +1,4 @@
-import { Message, MessageDocument, User, usePrisma, useTransaction } from "../../db";
+import { usePrisma } from "../../db";
 import { BotContext } from "../../session";
 import { Markup, Scenes } from "telegraf";
 import { ScenesIDs, goToMainScene, isAdmin } from "../common";
@@ -26,11 +26,6 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
     where: { state: MessageState.New, id: query },
     orderBy: { id: mode === "back" ? "desc" : "asc" },
   });
-
-  // const response = await Message.find({ state: MessageState.New, _id: query })
-  //   .sort({ _id: mode === "back" ? -1 : 1 })
-  //   .limit(1);
-  // const message = response[0];
 
   if (!message) {
     const extra = {
@@ -138,7 +133,6 @@ showMessagesScene.action("confirm", async (ctx) => {
   const channelID = process.env.CHANNEL_ID;
   if (!currentMessageID || !channelID) throw new Error("no currentMessageID");
   const message = await prisma.message.findUnique({ where: { id: currentMessageID } });
-  // const message = await Message.findById(currentMessageID);
   if (!message) throw new Error("message now found");
 
   if (message.type === MessageType.Text) {
@@ -154,11 +148,6 @@ showMessagesScene.action("confirm", async (ctx) => {
       data: { state: { set: MessageState.Sent } },
     });
   });
-
-  // await useTransaction(async () => {
-  //   message.state = MessageState.Sent;
-  //   await message.save();
-  // });
 
   await ctx.answerCbQuery(str.toasts.message_sent_successfully);
 
@@ -178,7 +167,6 @@ showMessagesScene.action("delete", async (ctx) => {
   const currentMessageID = ctx.session.currentMessageTemp?._id;
   if (!currentMessageID) throw new Error("no currentMessageID");
   const message = await prisma.message.findUnique({ where: { id: currentMessageID } });
-  // const message = await Message.findById(currentMessageID);
   if (!message) throw new Error("message now found");
 
   await prisma.$transaction(async (tx) => {
@@ -186,11 +174,7 @@ showMessagesScene.action("delete", async (ctx) => {
       where: { id: message.id },
       data: { state: { set: MessageState.Deleted } },
     });
-  });
-  // await useTransaction(async () => {
-  //   message.state = MessageState.Deleted;
-  //   await message.save();
-  // });
+  });  
 
   await ctx.answerCbQuery(str.toasts.message_deleted_successfully);
 
