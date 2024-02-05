@@ -11,13 +11,16 @@ const mainScene = new Scenes.WizardScene<BotContext>(ScenesIDs.MainScene, async 
   const chat = ctx.chat;
   if (chat?.type !== "private") return;
   const userName = chat.first_name + " " + (chat.last_name ?? "");
+  console.log(ctx.session.cnt);
+  if (ctx.session.cnt === undefined) ctx.session.cnt = 0;
+
   await ctx.reply(
     ctx.session.cnt ? str.start.any_help : formatStrings(str.start.hi_user, { name: userName }),
     isAdmin(ctx)
       ? Markup.keyboard([str.keyboard.send_question, str.keyboard.admin.review_messages])
       : Markup.keyboard([str.keyboard.send_question]),
   );
-  ctx.session.cnt = 1;
+  ctx.session.cnt++;
 });
 
 mainScene.hears(str.keyboard.send_question, async (ctx) => {

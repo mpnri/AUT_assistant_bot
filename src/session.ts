@@ -1,15 +1,19 @@
 import { MessageType } from "@prisma/client";
 import { Context, Scenes } from "telegraf";
-import { SceneContextScene, SceneSession } from "telegraf/typings/scenes";
-import { SessionContext } from "telegraf/typings/session";
 
-export interface SessionData {
+interface MyWizardSession extends Scenes.WizardSessionData {
+  //! inside scene session
+	//* will be available under `ctx.scene.session.myWizardSessionProp`
+	// myWizardSessionProp: number;
+}
+
+export interface SessionData extends Scenes.WizardSession<MyWizardSession> {
   status?: string;
-  cnt: number;
+  cnt?: number;
   /**
-   * @deprecated
+   * @internal
    */
-  __scenes: any;
+  // __scenes: WizardSessionData;
 
   //* send message scene
   replyMessageID?: number;
@@ -22,18 +26,12 @@ export interface SessionData {
   //* show messages scene
   currentMessageTemp?: {
     _id: string;
-  }
+  };
 }
-
-export const InitialSessionData: Omit<SessionData, "__scenes"> = {
-  cnt: 0,
-  messageTemp: undefined,
-};
 
 export interface BotContext extends Context {
   session: SessionData;
-  //todo: add state?
   // scene: SceneContextScene<BotContext, Scenes.SceneContext>;
-  scene: SceneContextScene<BotContext, Scenes.WizardSessionData>;
+  scene: Scenes.SceneContextScene<BotContext, MyWizardSession>;
   wizard: Scenes.WizardContextWizard<BotContext>;
 }

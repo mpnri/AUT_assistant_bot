@@ -2,7 +2,7 @@ import { SocksProxyAgent } from "socks-proxy-agent";
 import { Context, Markup, Telegraf, session } from "telegraf";
 import { strings } from "./intl/fa";
 import { User, UserDocument, connectToDB, usePrisma, useTransaction } from "./db";
-import { BotContext, InitialSessionData } from "./session";
+import { BotContext } from "./session";
 import { BotStage, ScenesIDs, goToMainScene } from "./scenes";
 
 const proxy = new SocksProxyAgent("socks5://127.0.0.1:10808");
@@ -15,7 +15,7 @@ const MainApp = async (token: string) => {
     telegram: { agent: proxy },
   });
 
-  bot.use(session({ defaultSession: () => InitialSessionData }));
+  bot.use(session());
   bot.use(BotStage.middleware());
 
   bot.start(async (ctx) => {
