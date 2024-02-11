@@ -5,6 +5,7 @@ declare global {
       DB_URL?: string;
       CHANNEL_ID?: string;
       ADMIN_USERS?: string;
+      HELPER_CHANNEL_ID?: string;
     }
   }
 }

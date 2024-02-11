@@ -159,6 +159,25 @@ sendMessageScene.leave(async (ctx) => {
   const { title, type, pollOptions } = message;
   if (!title) return;
 
+  // const helperChannelID = process.env.HELPER_CHANNEL_ID;
+  // if (!helperChannelID) throw new Error("no helperChannelID");
+
+  // try {
+  //   if (type === MessageType.Poll) {
+  //     //todo: !
+  //     if (!pollOptions) throw new Error("no poll options");
+  //     const pollMessage = await ctx.telegram.sendPoll(helperChannelID, title, pollOptions);
+  //     await ctx.telegram.deleteMessage(helperChannelID, pollMessage.message_id);
+  //   } else if (type === MessageType.Text) {
+  //     const textMessage = await ctx.telegram.sendMessage(helperChannelID, title);
+  //     await ctx.telegram.deleteMessage(helperChannelID, textMessage.message_id);
+  //   }
+  // } catch (error) {
+  //   ctx.session.messageTemp = undefined;
+  //   await ctx.reply(str.message_can_not_be_send);
+  //   return;
+  // }
+
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({ where: { uid: chat.id } });
     console.log(user);
