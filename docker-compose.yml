@@ -1,7 +1,7 @@
 version: '3'
 services:
   AUT-bot:
-    build: ./Dockerfile.yml
+    build: .
     depends_on:
       - AUT-mongo
     # environment:
