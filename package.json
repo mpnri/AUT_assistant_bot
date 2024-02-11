@@ -7,11 +7,15 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
+    "start": "ts-node src/index.ts",
     "dev": "ts-node-dev src/index.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",
+    "@types/html-escaper": "^3.0.2",
     "dotenv": "^16.3.1",
+    "html-escaper": "^3.0.3",
+    "jalali-moment": "^3.3.11",
     "mongoose": "^7.5.0",
     "socks-proxy-agent": "^8.0.1",
     "telegraf": "^4.15.3"

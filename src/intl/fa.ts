@@ -28,6 +28,9 @@ export const strings = {
       should_send_one_option: "حداقل باید یک گزینه را وارد کنید.",
       message_sent_successfully:
         "✅ پیام شما با موفقیت ارسال شد و پس از تایید ادمین در کانال قرار خواهد گرفت.",
+      //todo: say more details
+      message_can_not_be_send:
+        "مشکلی در ثبت پیام ارسالی به وجود آمد. احتمالا از کارکترهایی استفاده کردید که در نظرسنجی تلگرام ساپورت نمیشوند.",
       buttons: {
         end: "پایان و ارسال",
       },
@@ -41,6 +44,8 @@ export const strings = {
         message_deleted_successfully: "❎ پیام با موفقیت حذف شد.",
       },
       message: {
+        id: "آیدی پیام ارسالی:",
+        date: "تاریخ پیام ارسالی:",
         text: "متن پیام ارسالی:",
         type: "نوع پیام ارسالی:",
         option: "گزینه {number}:",

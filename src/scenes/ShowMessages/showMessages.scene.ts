@@ -5,6 +5,8 @@ import { ScenesIDs, goToMainScene, isAdmin } from "../common";
 import { formatStrings } from "../../utils";
 import { strings } from "../../intl/fa";
 import { MessageState, MessageType } from "@prisma/client";
+import { escape, unescape } from "html-escaper";
+import moment from "jalali-moment";
 
 const prisma = usePrisma();
 
@@ -54,15 +56,19 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
     return false;
   }
 
+  const date = moment(message.createdAt).locale("fa").format("YYYY/MM/DD - HH:mm:ss");
+
   const messageText =
+    `💡 <b>${str.message.id}</b>\n${escape(message.id)}\n\n` +
+    `⏱️ <b>${str.message.date}</b>\n${escape(date)}\n\n` +
     `🔷 <b>${str.message.type}</b>\n${strings[message.type]}\n\n` +
-    `✏️ <b>${str.message.text}</b>\n${message.title}\n\n` +
+    `✏️ <b>${str.message.text}</b>\n${escape(message.title)}\n\n` +
     (message.type === MessageType.Poll
       ? message.pollOptions
           ?.map(
             (option, index) =>
               `<b>${formatStrings(str.message.option, { number: index + 1 })}</b>` +
-              `\n🔸 ${option}`,
+              `\n🔸 ${escape(option)}`,
           )
           .join("\n")
       : "");
@@ -131,7 +137,7 @@ showMessagesScene.action("back", async (ctx) => {
 showMessagesScene.action("confirm", async (ctx) => {
   const currentMessageID = ctx.session.currentMessageTemp?._id;
   const channelID = process.env.CHANNEL_ID;
-  if (!currentMessageID || !channelID) throw new Error("no currentMessageID");
+  if (!currentMessageID || !channelID) throw new Error("no currentMessageID or channelID");
   const message = await prisma.message.findUnique({ where: { id: currentMessageID } });
   if (!message) throw new Error("message now found");
 
@@ -174,7 +180,7 @@ showMessagesScene.action("delete", async (ctx) => {
       where: { id: message.id },
       data: { state: { set: MessageState.Deleted } },
     });
-  });  
+  });
 
   await ctx.answerCbQuery(str.toasts.message_deleted_successfully);
 
