@@ -10,7 +10,7 @@ const prisma = usePrisma();
 
 const MainApp = async (token: string) => {
   const bot = new Telegraf<BotContext>(token, {
-    telegram: { agent: proxy },
+    telegram: process.env.IS_TEST === "true" ? { agent: proxy } : undefined,
   });
 
   bot.use(session());

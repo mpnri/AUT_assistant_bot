@@ -44,7 +44,9 @@ const handleShowMessages = async (ctx: BotContext, mode?: "next" | "back") => {
           : [[Markup.button.callback(str.buttons.back_to_home, "home")]],
       },
     };
-    ctx.answerCbQuery("❎ " + str.no_new_messages, { show_alert: false });
+    try {
+      ctx.answerCbQuery("❎ " + str.no_new_messages, { show_alert: false });
+    } catch (e) {}
 
     if (mode) {
       //* if we have mode, then a callback query dispatched. so we can use edit text.

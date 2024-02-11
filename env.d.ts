@@ -6,6 +6,7 @@ declare global {
       CHANNEL_ID?: string;
       ADMIN_USERS?: string;
       HELPER_CHANNEL_ID?: string;
+      IS_TEST?: string;
     }
   }
 }

@@ -3,20 +3,46 @@ services:
   aut-bot:
     build: .
     depends_on:
-      - aut-mongo
-    # environment:
-    #   - DB_URL=${DB_URL}
+      - aut-mongo-setup
+    environment:
+      - IS_TEST=false
 
   aut-mongo:
     image: mongo:7
-    # image: prismagraphql/mongo-single-replica:5.0.3
-    
-    command: --replSet rs0 && ./scripts/db.sh
+    hostname: aut-mongo
+    container_name: aut-mongo
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - 127.0.0.1:27017:27017
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
+    # healthcheck:
+    #   test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'host.docker.internal:27017'}]}) }" | mongosh --port 27017 --quiet
+    #   interval: 5s
+    #   timeout: 30s
+    #   start_period: 0s
+    #   start_interval: 1s
+    #   retries: 30
+
+    # volumes:
+    #   - "aut-mongo_data:/data/db"
+    #   - "aut-mongo_config:/data/configdb"
     # todo
     # environment:
     #   - name=value
-    ports:
-      - 127.0.0.1:27017:27017
+    
   
+  aut-mongo-setup:
+    image: mongo:7  
+    depends_on:
+      - aut-mongo
+    restart: "no"
+    entrypoint: 
+      - bash
+      - -c
+      - |
+        sleep 0
+        mongosh --host aut-mongo:27017 --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});"
+     
   #* run after `docker compose up -d` for replica mongo:
   # docker-compose exec AUT-mongo mongosh --eval "rs.initiate({_id: 'rs0', members: [{_id: 0, host: 'localhost:27017'}]});"
