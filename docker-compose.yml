@@ -1,11 +1,11 @@
 version: '3'
 services:
-  # AUT-bot:
-  #   # build: .
-  #   depends_on:
-  #     - AUT-mongo
-  #   environment:
-  #     - DB_URL=${DB_URL}
+  AUT-bot:
+    build: .
+    depends_on:
+      - AUT-mongo
+    # environment:
+    #   - DB_URL=${DB_URL}
 
   AUT-mongo:
     image: mongo:7
