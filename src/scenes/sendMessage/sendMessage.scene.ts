@@ -203,4 +203,8 @@ sendMessageScene.leave(async (ctx) => {
   await ctx.reply(str.message_sent_successfully);
 });
 
+sendMessageScene.start(async (ctx) => {
+  await goToMainScene(ctx);
+});
+
 export { sendMessageScene };

@@ -202,4 +202,8 @@ showMessagesScene.action("home", async (ctx) => {
   await goToMainScene(ctx);
 });
 
+showMessagesScene.start(async (ctx) => {
+  await goToMainScene(ctx);
+});
+
 export { showMessagesScene };
